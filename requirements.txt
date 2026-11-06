@@ -1,0 +1,12 @@
+langgraph
+langgraph-checkpoint-sqlite
+langchain-aws
+langchain-openai
+boto3
+faiss-cpu
+numpy
+markdown
+python-dotenv
+fastapi
+uvicorn
+aiosqlite

@@ -1,0 +1,12 @@
+{
+    "trade_id": "T-9003",
+    "counterparty": "EuroTrade GmbH",
+    "expected_amount": 200000.00,
+    "actual_amount": 200000.00,
+    "expected_date": "2026-10-16",
+    "actual_date": "2026-10-17",
+    "quantity_expected": 10000,
+    "quantity_received": 10000,
+    "error_message": "One-day settlement delay due to holiday. No PII involved, standard trade.",
+    "notes": "Counterparty confirmed delay."
+}

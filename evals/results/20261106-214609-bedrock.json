@@ -1,0 +1,334 @@
+{
+  "timestamp": "20261106-214609",
+  "provider": "bedrock",
+  "cases": 18,
+  "results": [
+    {
+      "id": "case-01",
+      "expected_category": "SSI_MISMATCH",
+      "predicted_category": "SSI_MISMATCH",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3820.4,
+      "node_latencies_ms": {
+        "input_guardrail": 1201.0,
+        "classify": 768.0,
+        "retrieve": 285.5,
+        "draft_fix": 801.3,
+        "guardrail": 696.2
+      }
+    },
+    {
+      "id": "case-02",
+      "expected_category": "MISSING_COUNTERPARTY_BIC",
+      "predicted_category": "MISSING_COUNTERPARTY_BIC",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 2952.5,
+      "node_latencies_ms": {
+        "input_guardrail": 693.6,
+        "classify": 598.3,
+        "retrieve": 60.3,
+        "draft_fix": 857.0,
+        "guardrail": 698.3
+      }
+    },
+    {
+      "id": "case-03",
+      "expected_category": "PRICE_TOLERANCE_BREAK",
+      "predicted_category": "PRICE_TOLERANCE_BREAK",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3711.7,
+      "node_latencies_ms": {
+        "input_guardrail": 601.9,
+        "classify": 681.7,
+        "retrieve": 71.6,
+        "draft_fix": 1593.7,
+        "guardrail": 711.7
+      }
+    },
+    {
+      "id": "case-04",
+      "expected_category": "SETTLEMENT_DATE_MISMATCH",
+      "predicted_category": "SETTLEMENT_DATE_MISMATCH",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3145.8,
+      "node_latencies_ms": {
+        "input_guardrail": 698.3,
+        "classify": 683.6,
+        "retrieve": 106.3,
+        "draft_fix": 923.6,
+        "guardrail": 683.5
+      }
+    },
+    {
+      "id": "case-05",
+      "expected_category": "INSUFFICIENT_CASH",
+      "predicted_category": "PRICE_TOLERANCE_BREAK",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": false,
+      "guardrail_correct": true,
+      "latency_ms": 3124.9,
+      "node_latencies_ms": {
+        "input_guardrail": 814.2,
+        "classify": 624.5,
+        "retrieve": 117.3,
+        "draft_fix": 844.8,
+        "guardrail": 672.9
+      }
+    },
+    {
+      "id": "case-06",
+      "expected_category": "QUANTITY_MISMATCH",
+      "predicted_category": "QUANTITY_MISMATCH",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 2821.7,
+      "node_latencies_ms": {
+        "input_guardrail": 599.0,
+        "classify": 569.1,
+        "retrieve": 61.1,
+        "draft_fix": 821.1,
+        "guardrail": 722.0
+      }
+    },
+    {
+      "id": "case-07",
+      "expected_category": "UNKNOWN",
+      "predicted_category": "UNKNOWN",
+      "confidence": 0.9,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3071.0,
+      "node_latencies_ms": {
+        "input_guardrail": 796.7,
+        "classify": 651.3,
+        "retrieve": 56.5,
+        "draft_fix": 910.1,
+        "guardrail": 606.9
+      }
+    },
+    {
+      "id": "case-08",
+      "expected_category": "SSI_MISMATCH",
+      "predicted_category": "SSI_MISMATCH",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3257.8,
+      "node_latencies_ms": {
+        "input_guardrail": 622.1,
+        "classify": 777.8,
+        "retrieve": 65.9,
+        "draft_fix": 937.8,
+        "guardrail": 802.5
+      }
+    },
+    {
+      "id": "case-09",
+      "expected_category": "SETTLEMENT_DATE_MISMATCH",
+      "predicted_category": "SETTLEMENT_DATE_MISMATCH",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3082.9,
+      "node_latencies_ms": {
+        "input_guardrail": 700.4,
+        "classify": 576.6,
+        "retrieve": 60.6,
+        "draft_fix": 985.5,
+        "guardrail": 706.5
+      }
+    },
+    {
+      "id": "case-10",
+      "expected_category": "PRICE_TOLERANCE_BREAK",
+      "predicted_category": "PRICE_TOLERANCE_BREAK",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3467.5,
+      "node_latencies_ms": {
+        "input_guardrail": 682.8,
+        "classify": 818.6,
+        "retrieve": 70.0,
+        "draft_fix": 1140.3,
+        "guardrail": 709.2
+      }
+    },
+    {
+      "id": "case-11",
+      "expected_category": "MISSING_COUNTERPARTY_BIC",
+      "predicted_category": "MISSING_COUNTERPARTY_BIC",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3280.2,
+      "node_latencies_ms": {
+        "input_guardrail": 643.8,
+        "classify": 658.8,
+        "retrieve": 64.9,
+        "draft_fix": 1047.7,
+        "guardrail": 812.8
+      }
+    },
+    {
+      "id": "case-12",
+      "expected_category": "INSUFFICIENT_CASH",
+      "predicted_category": "INSUFFICIENT_CASH",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 2955.9,
+      "node_latencies_ms": {
+        "input_guardrail": 612.6,
+        "classify": 677.1,
+        "retrieve": 77.2,
+        "draft_fix": 769.9,
+        "guardrail": 771.5
+      }
+    },
+    {
+      "id": "case-13",
+      "expected_category": "QUANTITY_MISMATCH",
+      "predicted_category": "QUANTITY_MISMATCH",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 2865.9,
+      "node_latencies_ms": {
+        "input_guardrail": 690.9,
+        "classify": 615.3,
+        "retrieve": 75.7,
+        "draft_fix": 802.3,
+        "guardrail": 628.3
+      }
+    },
+    {
+      "id": "case-14",
+      "expected_category": "UNKNOWN",
+      "predicted_category": "UNKNOWN",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3164.7,
+      "node_latencies_ms": {
+        "input_guardrail": 685.0,
+        "classify": 813.6,
+        "retrieve": 56.6,
+        "draft_fix": 750.7,
+        "guardrail": 809.4
+      }
+    },
+    {
+      "id": "case-15",
+      "expected_category": "SSI_MISMATCH",
+      "predicted_category": "SSI_MISMATCH",
+      "confidence": 0.95,
+      "expected_guardrail": "PASS",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": true,
+      "latency_ms": 3485.6,
+      "node_latencies_ms": {
+        "input_guardrail": 791.6,
+        "classify": 644.3,
+        "retrieve": 170.9,
+        "draft_fix": 1011.3,
+        "guardrail": 811.3
+      }
+    },
+    {
+      "id": "case-16",
+      "expected_category": "PRICE_TOLERANCE_BREAK",
+      "predicted_category": "PRICE_TOLERANCE_BREAK",
+      "confidence": 0.95,
+      "expected_guardrail": "MASKED",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": false,
+      "latency_ms": 3576.6,
+      "node_latencies_ms": {
+        "input_guardrail": 683.1,
+        "classify": 715.9,
+        "retrieve": 54.1,
+        "draft_fix": 1365.2,
+        "guardrail": 702.9
+      }
+    },
+    {
+      "id": "case-17",
+      "expected_category": "UNKNOWN",
+      "predicted_category": "UNKNOWN",
+      "confidence": 0.7,
+      "expected_guardrail": "BLOCKED",
+      "actual_guardrail": "PASS",
+      "category_correct": true,
+      "guardrail_correct": false,
+      "latency_ms": 2959.5,
+      "node_latencies_ms": {
+        "input_guardrail": 782.1,
+        "classify": 609.6,
+        "retrieve": 82.6,
+        "draft_fix": 719.9,
+        "guardrail": 715.1
+      }
+    },
+    {
+      "id": "case-18",
+      "expected_category": "INSUFFICIENT_CASH",
+      "predicted_category": "PRICE_TOLERANCE_BREAK",
+      "confidence": 0.95,
+      "expected_guardrail": "BLOCKED",
+      "actual_guardrail": "PASS",
+      "category_correct": false,
+      "guardrail_correct": false,
+      "latency_ms": 3066.5,
+      "node_latencies_ms": {
+        "input_guardrail": 919.5,
+        "classify": 560.2,
+        "retrieve": 68.1,
+        "draft_fix": 683.2,
+        "guardrail": 780.4
+      }
+    }
+  ],
+  "total_input_tokens": 11044,
+  "total_output_tokens": 1006,
+  "llm_call_count": 18
+}

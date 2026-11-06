@@ -1,0 +1,11 @@
+{
+  "trade_id": "T-2087",
+  "counterparty": "Synthetic Corp Ltd",
+  "expected_amount": 750000,
+  "actual_amount": 750000,
+  "expected_date": "2026-11-04",
+  "actual_date": "2026-11-06",
+  "quantity_expected": 5000,
+  "quantity_received": 5000,
+  "error_message": "Settlement date mismatch: funds arrived 2 days late."
+}

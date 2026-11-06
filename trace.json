@@ -1,0 +1,163 @@
+{
+  "input_guardrail": {
+    "input": {
+      "exception": {
+        "trade_id": "T-9999",
+        "counterparty": "Acme Corp",
+        "expected_amount": 1000000,
+        "actual_amount": 950000,
+        "expected_date": "2026-11-05",
+        "actual_date": "2026-11-05",
+        "quantity_expected": 5000,
+        "quantity_received": 5000,
+        "error_message": "Underpayment received. Contact John Smith at john.smith@example.com or (555) 123-4567, SSN 123-45-6789, account ACCT-12345678."
+      }
+    },
+    "output": {
+      "exception": {
+        "trade_id": "T-9999",
+        "counterparty": "Acme Corp",
+        "expected_amount": 1000000,
+        "actual_amount": 950000,
+        "expected_date": "2026-11-05",
+        "actual_date": "2026-11-05",
+        "quantity_expected": 5000,
+        "quantity_received": 5000,
+        "error_message": "Underpayment received. Contact John Smith at john.smith@example.com or (555) 123-4567, SSN 123-45-6789, account ACCT-12345678."
+      },
+      "input_guardrail_audit": {
+        "node": "input_guardrail",
+        "timestamp": "audit_entry",
+        "provider": "bedrock",
+        "action": "PASS",
+        "blocked_policies": [],
+        "masked_entities": []
+      },
+      "input_masked_entities": []
+    }
+  },
+  "classify": {
+    "input": {
+      "exception": {
+        "trade_id": "T-9999",
+        "counterparty": "Acme Corp",
+        "expected_amount": 1000000,
+        "actual_amount": 950000,
+        "expected_date": "2026-11-05",
+        "actual_date": "2026-11-05",
+        "quantity_expected": 5000,
+        "quantity_received": 5000,
+        "error_message": "Underpayment received. Contact John Smith at john.smith@example.com or (555) 123-4567, SSN 123-45-6789, account ACCT-12345678."
+      }
+    },
+    "output": {
+      "category": "PRICE_TOLERANCE_BREAK",
+      "confidence": 0.95,
+      "reason": "The actual amount received is less than the expected amount by 50000."
+    }
+  },
+  "retrieve": {
+    "input": {
+      "category": "PRICE_TOLERANCE_BREAK"
+    },
+    "output": {
+      "runbook_chunks": [
+        {
+          "id": "RB-price_tolerance-symptoms",
+          "heading": "## Symptoms",
+          "content": "- Trade validation fails with \"price outside tolerance\" error\n- Margin call or additional collateral required\n- Risk dashboard shows anomalous trade price\n- Manual approval workflow triggered",
+          "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/price_tolerance.md",
+          "score": 0.7626532912254333
+        },
+        {
+          "id": "RB-settlement_date-symptoms",
+          "heading": "## Symptoms",
+          "content": "- Settlement fails on expected date\n- Counterparty confirms different settlement date\n- Early settlement (trade settles before agreed date)\n- Late settlement with counterparty complaint",
+          "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/settlement_date.md",
+          "score": 0.7361065149307251
+        },
+        {
+          "id": "RB-insufficient_cash-symptoms",
+          "heading": "## Symptoms",
+          "content": "- Trade returns \"insufficient funds\" status\n- Settlement delay while funds are arranged\n- Counterparty requests settlement extension\n- Overdraft fees incurred",
+          "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/insufficient_cash.md",
+          "score": 0.7291110754013062
+        }
+      ],
+      "retrieved_chunk_ids": [
+        "RB-price_tolerance-symptoms",
+        "RB-settlement_date-symptoms",
+        "RB-insufficient_cash-symptoms"
+      ]
+    }
+  },
+  "draft_fix": {
+    "input": {
+      "category": "PRICE_TOLERANCE_BREAK",
+      "exception": {
+        "trade_id": "T-9999",
+        "counterparty": "Acme Corp",
+        "expected_amount": 1000000,
+        "actual_amount": 950000,
+        "expected_date": "2026-11-05",
+        "actual_date": "2026-11-05",
+        "quantity_expected": 5000,
+        "quantity_received": 5000,
+        "error_message": "Underpayment received. Contact John Smith at john.smith@example.com or (555) 123-4567, SSN 123-45-6789, account ACCT-12345678."
+      },
+      "runbook_chunks": [
+        {
+          "id": "RB-price_tolerance-symptoms",
+          "heading": "## Symptoms",
+          "content": "- Trade validation fails with \"price outside tolerance\" error\n- Margin call or additional collateral required\n- Risk dashboard shows anomalous trade price\n- Manual approval workflow triggered",
+          "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/price_tolerance.md",
+          "score": 0.7626532912254333
+        },
+        {
+          "id": "RB-settlement_date-symptoms",
+          "heading": "## Symptoms",
+          "content": "- Settlement fails on expected date\n- Counterparty confirms different settlement date\n- Early settlement (trade settles before agreed date)\n- Late settlement with counterparty complaint",
+          "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/settlement_date.md",
+          "score": 0.7361065149307251
+        },
+        {
+          "id": "RB-insufficient_cash-symptoms",
+          "heading": "## Symptoms",
+          "content": "- Trade returns \"insufficient funds\" status\n- Settlement delay while funds are arranged\n- Counterparty requests settlement extension\n- Overdraft fees incurred",
+          "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/insufficient_cash.md",
+          "score": 0.7291110754013062
+        }
+      ]
+    },
+    "output": {
+      "draft": "Root cause: Underpayment received\nProposed fix steps: Contact John Smith at john.smith@example.com or (555) 123-4567, SSN 123-45-6789, account ACCT-12345678 to resolve the underpayment issue., Verify the trade details and ensure the correct price was used for settlement., Check for any discrepancies in the settlement process that may have led to the underpayment.\nCitations: ",
+      "root_cause": "Underpayment received",
+      "proposed_fix_steps": [
+        "Contact John Smith at john.smith@example.com or (555) 123-4567, SSN 123-45-6789, account ACCT-12345678 to resolve the underpayment issue.",
+        "Verify the trade details and ensure the correct price was used for settlement.",
+        "Check for any discrepancies in the settlement process that may have led to the underpayment."
+      ],
+      "citations": [],
+      "risk_notes": null
+    }
+  },
+  "guardrail": {
+    "input": {
+      "draft": "Root cause: Underpayment received\nProposed fix steps: Contact John Smith at john.smith@example.com or (555) 123-4567, SSN 123-45-6789, account ACCT-12345678 to resolve the underpayment issue., Verify the trade details and ensure the correct price was used for settlement., Check for any discrepancies in the settlement process that may have led to the underpayment.\nCitations: "
+    },
+    "output": {
+      "guardrail_action": "PASS",
+      "guardrail_audit": {
+        "node": "guardrail",
+        "timestamp": "audit_entry",
+        "provider": "bedrock",
+        "action": "PASS",
+        "blocked_policies": [],
+        "masked_entities": []
+      },
+      "draft": "Root cause: Underpayment received\nProposed fix steps: Contact John Smith at john.smith@example.com or (555) 123-4567, SSN 123-45-6789, account ACCT-12345678 to resolve the underpayment issue., Verify the trade details and ensure the correct price was used for settlement., Check for any discrepancies in the settlement process that may have led to the underpayment.\nCitations: ",
+      "blocked_policies": [],
+      "masked_entities": []
+    }
+  }
+}

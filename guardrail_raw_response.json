@@ -1,0 +1,98 @@
+{
+  "ResponseMetadata": {
+    "RequestId": "114fd229-948d-4c2a-8213-66ef3285b490",
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "date": "Fri, 06 Nov 2026 06:33:45 GMT",
+      "content-type": "application/json",
+      "content-length": "1866",
+      "connection": "keep-alive",
+      "x-amzn-requestid": "114fd229-948d-4c2a-8213-66ef3285b490"
+    },
+    "RetryAttempts": 0
+  },
+  "usage": {
+    "topicPolicyUnits": 1,
+    "contentPolicyUnits": 1,
+    "wordPolicyUnits": 1,
+    "sensitiveInformationPolicyUnits": 1,
+    "sensitiveInformationPolicyFreeUnits": 1,
+    "contextualGroundingPolicyUnits": 0,
+    "automatedReasoningPolicyUnits": 0,
+    "automatedReasoningPolicies": 0
+  },
+  "action": "GUARDRAIL_INTERVENED",
+  "actionReason": "Guardrail masked.",
+  "outputs": [
+    {
+      "text": "His SSN is {US_SOCIAL_SECURITY_NUMBER}. Contact {NAME} at {EMAIL} or {PHONE}."
+    }
+  ],
+  "assessments": [
+    {
+      "sensitiveInformationPolicy": {
+        "piiEntities": [
+          {
+            "match": "123-45-6789",
+            "type": "US_SOCIAL_SECURITY_NUMBER",
+            "action": "ANONYMIZED",
+            "detected": true
+          },
+          {
+            "match": "John Smith",
+            "type": "NAME",
+            "action": "ANONYMIZED",
+            "detected": true
+          },
+          {
+            "match": "john.smith@example.com",
+            "type": "EMAIL",
+            "action": "ANONYMIZED",
+            "detected": true
+          },
+          {
+            "match": "(555) 123-4567",
+            "type": "PHONE",
+            "action": "ANONYMIZED",
+            "detected": true
+          }
+        ],
+        "regexes": []
+      },
+      "invocationMetrics": {
+        "guardrailProcessingLatency": 357,
+        "usage": {
+          "topicPolicyUnits": 1,
+          "contentPolicyUnits": 1,
+          "wordPolicyUnits": 1,
+          "sensitiveInformationPolicyUnits": 1,
+          "sensitiveInformationPolicyFreeUnits": 1,
+          "contextualGroundingPolicyUnits": 0,
+          "automatedReasoningPolicyUnits": 0,
+          "automatedReasoningPolicies": 0
+        },
+        "guardrailCoverage": {
+          "textCharacters": {
+            "guarded": 87,
+            "total": 87
+          }
+        }
+      },
+      "appliedGuardrailDetails": {
+        "guardrailId": "kpbvstqxc7l5",
+        "guardrailVersion": "2",
+        "guardrailArn": "arn:aws:bedrock:us-east-2:980610527816:guardrail/kpbvstqxc7l5",
+        "guardrailOrigin": [
+          "REQUEST"
+        ],
+        "guardrailOwnership": "SELF"
+      }
+    }
+  ],
+  "guardrailCoverage": {
+    "textCharacters": {
+      "guarded": 87,
+      "total": 87
+    }
+  }
+}

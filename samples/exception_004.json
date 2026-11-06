@@ -1,0 +1,12 @@
+{
+    "trade_id": "T-9001",
+    "counterparty": "BigCorp Finance LLC",
+    "expected_amount": 1000000.00,
+    "actual_amount": 1000000.00,
+    "expected_date": "2026-10-15",
+    "actual_date": "2026-10-15",
+    "quantity_expected": 50000,
+    "quantity_received": 50000,
+    "error_message": "Settlement complete but trade note contains PII: Contact John Smith (john.smith@bigcorp.com) at (555) 123-4567 for records. His SSN is 123-45-6789 for tax purposes. Account ACCT-12345678 was used.",
+    "notes": "Trade completed successfully."
+}

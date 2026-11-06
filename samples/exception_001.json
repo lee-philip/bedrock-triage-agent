@@ -1,0 +1,11 @@
+{
+  "trade_id": "T-1042",
+  "counterparty": "Fictional Bank AG",
+  "expected_amount": 1500000,
+  "actual_amount": 1485000,
+  "expected_date": "2026-11-05",
+  "actual_date": "2026-11-05",
+  "quantity_expected": 10000,
+  "quantity_received": 10000,
+  "error_message": "SSI mismatch: IBAN provided does not match known account for counterparty."
+}

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "RB-insufficient_cash-symptoms",
+    "heading": "## Symptoms",
+    "content": "- Trade returns \"insufficient funds\" status\n- Settlement delay while funds are arranged\n- Counterparty requests settlement extension\n- Overdraft fees incurred",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/insufficient_cash.md"
+  },
+  {
+    "id": "RB-insufficient_cash-likely-root-causes",
+    "heading": "## Likely Root Causes",
+    "content": "1. Counterparty liquidity issue\n2. Timing mismatch in fund transfer\n3. Incorrect trade value calculation\n4. Counterparty credit deterioration",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/insufficient_cash.md"
+  },
+  {
+    "id": "RB-insufficient_cash-checks",
+    "heading": "## Checks",
+    "content": "- Verify trade value and currency\n- Check counterparty credit status\n- Review funding transfer schedules\n- Verify settlement currency account is correct",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/insufficient_cash.md"
+  },
+  {
+    "id": "RB-insufficient_cash-fix-steps",
+    "heading": "## Fix Steps",
+    "content": "1. Identify trade and counterparty\n2. Contact counterparty to confirm funding status\n3. If timing issue, arrange settlement extension\n4. If liquidity issue, propose alternative settlement arrangement\n5. Update counterparty credit risk assessment",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/insufficient_cash.md"
+  },
+  {
+    "id": "RB-insufficient_cash-escalation",
+    "heading": "## Escalation",
+    "content": "If counterparty cannot settle within 48 hours, escalate to Credit Risk team. If counterparty disputes trade value, engage Legal.",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/insufficient_cash.md"
+  },
+  {
+    "id": "RB-missing_bic-symptoms",
+    "heading": "## Symptoms",
+    "content": "- Trade rejected by SWIFT network with \"BIC required\" message\n- Settlement delay while waiting for manual intervention\n- Payment cannot be routed internationally without BIC\n- Internal trade validation fails",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/missing_bic.md"
+  },
+  {
+    "id": "RB-missing_bic-likely-root-causes",
+    "heading": "## Likely Root Causes",
+    "content": "1. Legacy trade record from before BIC was mandatory\n2. New counterparty onboarded without complete SWIFT information\n3. Data migration error from old system\n4. Manual entry error on order entry form",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/missing_bic.md"
+  },
+  {
+    "id": "RB-missing_bic-checks",
+    "heading": "## Checks",
+    "content": "- Verify counterparty master record in CRM for BIC value\n- Check if trade is domestic (BIC may be optional)\n- Review trade timestamp \u2014 is this a legacy record?\n- Search counterparty portal for complete SWIFT details",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/missing_bic.md"
+  },
+  {
+    "id": "RB-missing_bic-fix-steps",
+    "heading": "## Fix Steps",
+    "content": "1. Identify counterparty from trade record\n2. Retrieve BIC from counterparty master record or portal\n3. Update trade settlement instruction with BIC\n4. If counterparty is new and BIC unknown, contact counterparty directly\n5. Revalidate trade and resubmit",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/missing_bic.md"
+  },
+  {
+    "id": "RB-missing_bic-escalation",
+    "heading": "## Escalation",
+    "content": "If counterparty is new and no BIC can be found after 24 hours, escalate to Onboarding team. If BIC exists but trade still fails, engage SWIFT support via the Payments Ops team.",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/missing_bic.md"
+  },
+  {
+    "id": "RB-price_tolerance-symptoms",
+    "heading": "## Symptoms",
+    "content": "- Trade validation fails with \"price outside tolerance\" error\n- Margin call or additional collateral required\n- Risk dashboard shows anomalous trade price\n- Manual approval workflow triggered",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/price_tolerance.md"
+  },
+  {
+    "id": "RB-price_tolerance-likely-root-causes",
+    "heading": "## Likely Root Causes",
+    "content": "1. Market gap during order execution (price moved significantly)\n2. Stale price data used for validation\n3. Incorrect tolerance parameters configured for the asset\n4. Data entry error in trade ticket",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/price_tolerance.md"
+  },
+  {
+    "id": "RB-price_tolerance-checks",
+    "heading": "## Checks",
+    "content": "- Compare trade price to market reference price at trade time\n- Review tolerance parameters for this asset class\n- Verify timestamp alignment between trade and market data\n- Check if multiple trades in same session have similar deviations",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/price_tolerance.md"
+  },
+  {
+    "id": "RB-price_tolerance-fix-steps",
+    "heading": "## Fix Steps",
+    "content": "1. Identify trade and asset class\n2. Retrieve market reference price for trade timestamp\n3. Calculate actual deviation percentage\n4. If within acceptable range, override tolerance check\n5. If significant deviation, route to Risk team for manual approval\n6. Document approval and update risk metrics",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/price_tolerance.md"
+  },
+  {
+    "id": "RB-price_tolerance-escalation",
+    "heading": "## Escalation",
+    "content": "If deviation exceeds 5%, escalate to Head of Trading. If market data itself appears incorrect, engage Data Quality team and notify Risk.",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/price_tolerance.md"
+  },
+  {
+    "id": "RB-quantity_mismatch-symptoms",
+    "heading": "## Symptoms",
+    "content": "- Delivery/acceptance shows different quantity than trade ticket\n- Invoicing discrepancy\n- Reconciliation fails\n- Counterparty disputes quantity received",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/quantity_mismatch.md"
+  },
+  {
+    "id": "RB-quantity_mismatch-likely-root-causes",
+    "heading": "## Likely Root Causes",
+    "content": "1. Manual entry error\n2. Delivery split across multiple shipments not captured\n3. Shrinkage or spoilage (commodities)\n4. Different measurement units",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/quantity_mismatch.md"
+  },
+  {
+    "id": "RB-quantity_mismatch-checks",
+    "heading": "## Checks",
+    "content": "- Compare trade ticket quantity vs. delivery documents\n- Verify measurement units match\n- Check delivery history for partial deliveries\n- Review weighbridge or measurement records",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/quantity_mismatch.md"
+  },
+  {
+    "id": "RB-quantity_mismatch-fix-steps",
+    "heading": "## Fix Steps",
+    "content": "1. Identify trade and quantity discrepancy\n2. Obtain delivery documents and measurement records\n3. Determine actual quantity delivered\n4. If delivery issue, coordinate with Logistics\n5. If measurement issue, recalibrate and re-measure\n6. Adjust trade settlement accordingly",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/quantity_mismatch.md"
+  },
+  {
+    "id": "RB-quantity_mismatch-escalation",
+    "heading": "## Escalation",
+    "content": "If counterparty disputes records, escalate to Dispute Resolution. If systematic measurement issues, engage Quality Assurance.",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/quantity_mismatch.md"
+  },
+  {
+    "id": "RB-settlement_date-symptoms",
+    "heading": "## Symptoms",
+    "content": "- Settlement fails on expected date\n- Counterparty confirms different settlement date\n- Early settlement (trade settles before agreed date)\n- Late settlement with counterparty complaint",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/settlement_date.md"
+  },
+  {
+    "id": "RB-settlement_date-likely-root-causes",
+    "heading": "## Likely Root Causes",
+    "content": "1. Different calendar conventions (business day vs. settlement day)\n2. Holiday calendar mismatch between counterparties\n3. Manual entry error on trade ticket\n4. Amendment to trade not reflected in settlement system",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/settlement_date.md"
+  },
+  {
+    "id": "RB-settlement_date-checks",
+    "heading": "## Checks",
+    "content": "- Compare trade ticket settlement date vs. settlement system date\n- Review holiday calendars for both counterparties\n- Check trade amendment history\n- Verify calendar conventions agreed in ISDA documentation",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/settlement_date.md"
+  },
+  {
+    "id": "RB-settlement_date-fix-steps",
+    "heading": "## Fix Steps",
+    "content": "1. Identify trade and settlement date discrepancy\n2. Determine correct settlement date per trade agreement\n3. Update settlement system with correct date\n4. Notify counterparty of corrected date\n5. If settlement already occurred, process adjustment",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/settlement_date.md"
+  },
+  {
+    "id": "RB-settlement_date-escalation",
+    "heading": "## Escalation",
+    "content": "If trade is a structured product with complex settlement terms, escalate to Legal. If counterparty disagrees on correct date, engage Dispute Resolution.",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/settlement_date.md"
+  },
+  {
+    "id": "RB-ssi_mismatch-symptoms",
+    "heading": "## Symptoms",
+    "content": "- Settlement fails with \"IBAN not recognized\" or \"account not found\"\n- Trade confirmation shows different bank details than order entry\n- Funds sent to wrong account or returned after a delay\n- Manual reconciliation notices from counterparty operations",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/ssi_mismatch.md"
+  },
+  {
+    "id": "RB-ssi_mismatch-likely-root-causes",
+    "heading": "## Likely Root Causes",
+    "content": "1. Counterparty changed bank account without notifying internal settlement team\n2. Data entry error in order entry system\n3. Stale SSI data in legacy settlement database\n4. Different settlement instructions used for different trade sizes or regions",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/ssi_mismatch.md"
+  },
+  {
+    "id": "RB-ssi_mismatch-checks",
+    "heading": "## Checks",
+    "content": "- Compare IBAN in trade order vs. counterparty SSI master record\n- Check counterparty portal for updated SSI details\n- Verify trade size and region to ensure correct SSI profile was applied\n- Review settlement history for recurring mismatch with this counterparty",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/ssi_mismatch.md"
+  },
+  {
+    "id": "RB-ssi_mismatch-fix-steps",
+    "heading": "## Fix Steps",
+    "content": "1. Retrieve current trade order and counterparty SSI from order entry system\n2. Verify counterparty's current bank details via counterparty portal or direct contact\n3. Update trade settlement instructions with correct IBAN and account name\n4. Reconcile with counterparty confirmation to ensure both sides match\n5. If funds already sent to wrong account, initiate recall procedure",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/ssi_mismatch.md"
+  },
+  {
+    "id": "RB-ssi_mismatch-escalation",
+    "heading": "## Escalation",
+    "content": "If counterparty portal is down and direct contact fails, escalate to Counterparty Relations team. If IBAN belongs to a different company, engage Legal and notify Internal Audit of potential fraud.",
+    "source": "/Users/phillee/Projects/bedrock-triage/bedrock-triage-agent/runbooks/ssi_mismatch.md"
+  }
+]

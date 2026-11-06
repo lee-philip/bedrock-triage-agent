@@ -1,0 +1,11 @@
+{
+  "trade_id": "T-3314",
+  "counterparty": "Dummy Broker LLC",
+  "expected_amount": 2000000,
+  "actual_amount": 2000000,
+  "expected_date": "2026-11-05",
+  "actual_date": "2026-11-05",
+  "quantity_expected": 20000,
+  "quantity_received": 19500,
+  "error_message": "Quantity mismatch: 500 units short against settlement instruction."
+}

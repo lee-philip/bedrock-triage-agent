@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from langgraph.errors import GraphRecursionError
 from app.graph import build_graph
 from app.config import BEDROCK_MODEL_ID, LMSTUDIO_MODEL
-from app.observability import get_callbacks, add_score, flush
+from app.observability import get_callbacks, add_score, flush, check_token_budget
 
 
 class TokenCounter:

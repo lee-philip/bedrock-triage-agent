@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.graph import build_graph, GraphRecursionError
 from app.state import TriageState
-from app.observability import get_callbacks, flush
+from app.observability import get_callbacks, flush, check_token_budget
 
 SAMPLES = {
     "exception_001": "samples/exception_001.json",

@@ -135,6 +135,19 @@ def observe(name, as_type="span", **kwargs):
         return noop_decorator
 
 
+MAX_TOKENS_PER_RUN = int(os.environ.get("MAX_TOKENS_PER_RUN", "50000"))
+
+
+def check_token_budget(state, tokens_used):
+    """Check if adding tokens_used would exceed MAX_TOKENS_PER_RUN.
+    
+    Returns:
+        bool: True if budget exceeded, False otherwise
+    """
+    accumulated = state.get("input_tokens", 0) + state.get("output_tokens", 0)
+    return accumulated + tokens_used > MAX_TOKENS_PER_RUN
+
+
 def start_span(name, **kwargs):
     """Start a manual span. Returns (span, langfuse) or (None, None) if unavailable.
 

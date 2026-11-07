@@ -59,6 +59,7 @@ LANGFUSE_PUBLIC_KEY=pk-lf-xxx
 LANGFUSE_SECRET_KEY=sk-lf-xxx
 LANGFUSE_BASE_URL=https://your-langfuse-instance.com
 LANGFUSE_ENABLED=true
+MAX_TOKENS_PER_RUN=50000
 ```
 
 For Langfuse Cloud: use `https://cloud.langfuse.com` (EU) or `https://us.cloud.langfuse.com` (US) as `LANGFUSE_BASE_URL`.
@@ -110,7 +111,13 @@ Langfuse's native alerting features (as of 2026):
 
 See [Langfuse alerting docs](https://langfuse.com/docs/observability/features/alerts) for current capabilities.
 
-### Fallback: Custom Cost/Latency Checker
+## Cost Guards
+
+### Token Budget
+
+`MAX_TOKENS_PER_RUN` (default: 50000) limits the total input + output tokens consumed by a single run. The graph tracks accumulated tokens in state and routes to `reject` with reason `BUDGET_EXCEEDED` when the budget is exceeded.
+
+### Daily Cost Monitoring
 
 `scripts/check_costs.py` reads daily cost and p95 latency from the Langfuse API and warns when thresholds are exceeded. Configure thresholds in `.env`:
 

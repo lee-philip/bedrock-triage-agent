@@ -42,8 +42,16 @@ async def draft_fix(state):
     )
     prompt = prompt_data["prompt"]
 
+    import json
     result = structured_llm.invoke(prompt)
-    tokens = result.usage_metadata.input_tokens + result.usage_metadata.output_tokens if result.usage_metadata else 0
+    # with_structured_output returns the parsed model, not a chat response
+    # so we estimate usage based on input/output text length
+    import tiktoken
+    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    input_tokens = len(enc.encode(prompt))
+    output_text = json.dumps(result.model_dump())
+    output_tokens = len(enc.encode(output_text))
+    tokens = input_tokens + output_tokens
 
     # Format as readable draft for guardrail + downstream
     draft_lines = [
@@ -63,8 +71,8 @@ async def draft_fix(state):
         "proposed_fix_steps": result.proposed_fix_steps,
         "citations": result.citations,
         "risk_notes": result.risk_notes,
-        "input_tokens": result.usage_metadata.input_tokens if result.usage_metadata else 0,
-        "output_tokens": result.usage_metadata.output_tokens if result.usage_metadata else 0,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
         "prompt_name": prompt_data.get("prompt_name"),
         "prompt_version": prompt_data.get("prompt_version"),
     }

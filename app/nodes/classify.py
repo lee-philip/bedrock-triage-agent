@@ -45,8 +45,17 @@ async def classify(state):
     )
     prompt = prompt_data["prompt"]
 
+    import json
     result = await structured_llm.ainvoke(prompt)
-    tokens = result.usage_metadata.input_tokens + result.usage_metadata.output_tokens if result.usage_metadata else 0
+    # Parse result to extract usage metadata from the underlying chat response
+    # with_structured_output returns the parsed model, not a chat response
+    # so we estimate usage based on input/output text length
+    import tiktoken
+    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    input_tokens = len(enc.encode(prompt))
+    output_text = json.dumps(result.model_dump())
+    output_tokens = len(enc.encode(output_text))
+    tokens = input_tokens + output_tokens
 
     print(f"\n=== CLASSIFY ===")
     print(f"Category: {result.category}")
@@ -56,8 +65,8 @@ async def classify(state):
         "category": result.category,
         "confidence": result.confidence,
         "reason": result.reason,
-        "input_tokens": result.usage_metadata.input_tokens if result.usage_metadata else 0,
-        "output_tokens": result.usage_metadata.output_tokens if result.usage_metadata else 0,
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
         "prompt_name": prompt_data.get("prompt_name"),
         "prompt_version": prompt_data.get("prompt_version"),
     }

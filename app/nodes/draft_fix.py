@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 
 from app.llm import get_chat_model
+from app.observability import get_prompt
 
 
 class FixDraft(BaseModel):
@@ -27,19 +28,22 @@ async def draft_fix(state):
     for i, chunk in enumerate(runbook_chunks):
         chunks_text += f"[{chunk['id']}] {chunk['heading']}\n{chunk['content']}\n\n"
 
-    prompt = f"""You are a settlement exception triage specialist. Based on the retrieved runbook excerpts below, draft a fix recommendation for the following exception.
-
-Exception Category: {category}
-Trade ID: {exception.get("trade_id", "N/A")}
-Error: {exception.get("error_message", "N/A")}
-
-Use only the runbook excerpts below. Cite chunk ids like [RB-SSI-2]. If the excerpts do not cover it, say so and recommend escalation.
-
-Runbook excerpts:
-{chunks_text}
-"""
+    # Load prompt from Langfuse with local fallback
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    fallback_path = os.path.join(base_dir, "prompts", "draft_fix.txt")
+    prompt_data = get_prompt(
+        "triage-draft",
+        fallback_path=fallback_path,
+        category=category,
+        trade_id=exception.get("trade_id", "N/A"),
+        error_message=exception.get("error_message", "N/A"),
+        runbook_excerpts=chunks_text,
+    )
+    prompt = prompt_data["prompt"]
 
     result = structured_llm.invoke(prompt)
+    tokens = result.usage_metadata.input_tokens + result.usage_metadata.output_tokens if result.usage_metadata else 0
 
     # Format as readable draft for guardrail + downstream
     draft_lines = [
@@ -59,4 +63,8 @@ Runbook excerpts:
         "proposed_fix_steps": result.proposed_fix_steps,
         "citations": result.citations,
         "risk_notes": result.risk_notes,
+        "input_tokens": result.usage_metadata.input_tokens if result.usage_metadata else 0,
+        "output_tokens": result.usage_metadata.output_tokens if result.usage_metadata else 0,
+        "prompt_name": prompt_data.get("prompt_name"),
+        "prompt_version": prompt_data.get("prompt_version"),
     }

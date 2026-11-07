@@ -1,0 +1,11 @@
+Classify this trade settlement exception:
+
+Trade ID: {trade_id}
+Counterparty: {counterparty}
+Expected amount: {expected_amount}
+Actual amount: {actual_amount}
+Expected settlement date: {expected_date}
+Actual settlement date: {actual_date}
+Quantity expected: {quantity_expected}
+Quantity received: {quantity_received}
+Error message: {error_message}

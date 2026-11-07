@@ -31,7 +31,10 @@ async def submit(sample_path: str):
     callbacks = get_callbacks(thread_id, thread_id)
     graph, conn = build_graph()
     try:
-        config = {"configurable": {"thread_id": thread_id}}
+        config = {
+            "configurable": {"thread_id": thread_id},
+            "recursion_limit": 12,
+        }
         if callbacks:
             config["callbacks"] = callbacks
 
@@ -93,7 +96,10 @@ async def review(thread_id: str):
     callbacks = get_callbacks(thread_id, thread_id)
     graph, conn = build_graph()
     try:
-        config = {"configurable": {"thread_id": thread_id}}
+        config = {
+            "configurable": {"thread_id": thread_id},
+            "recursion_limit": 12,
+        }
         if callbacks:
             config["callbacks"] = callbacks
 

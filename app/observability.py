@@ -12,7 +12,7 @@ from app.config import LLM_PROVIDER, LMSTUDIO_MODEL, BEDROCK_MODEL_ID
 logger = logging.getLogger(__name__)
 
 LANGFUSE_ENABLED = os.environ.get("LANGFUSE_ENABLED", "true").lower() == "true"
-LANGFUSE_BASE_URL = os.environ.get("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
+LANGFUSE_HOST = os.environ.get("LANGFUSE_HOST", "https://cloud.langfuse.com")
 LANGFUSE_PUBLIC_KEY = os.environ.get("LANGFUSE_PUBLIC_KEY")
 LANGFUSE_SECRET_KEY = os.environ.get("LANGFUSE_SECRET_KEY")
 
@@ -38,11 +38,7 @@ def get_client():
 
     try:
         from langfuse import get_client as lf_get_client
-        _client = lf_get_client(
-            public_key=LANGFUSE_PUBLIC_KEY,
-            secret_key=LANGFUSE_SECRET_KEY,
-            base_url=LANGFUSE_BASE_URL,
-        )
+        _client = lf_get_client()
         if not _client.auth_check():
             logger.warning("Langfuse authentication failed; tracing disabled")
             _client = None

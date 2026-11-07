@@ -50,7 +50,10 @@ async def run_sample(sample_id):
             audit=[],
         )
 
-        config = {"callbacks": callbacks} if callbacks else None
+        config = {
+            "callbacks": callbacks,
+            "recursion_limit": 12,
+        } if callbacks else {"recursion_limit": 12}
 
         try:
             final_state = await graph.ainvoke(initial_state, config=config)

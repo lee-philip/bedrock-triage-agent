@@ -115,7 +115,10 @@ async def run_case(graph, callbacks, case: Dict[str, Any], verbose: bool) -> Dic
     """Run a single case through the graph up to the review interrupt."""
     exception = case["exception"]
     thread_id = f"eval-{case['id']}-{int(time.time())}"
-    config = {"configurable": {"thread_id": thread_id}}
+    config = {
+        "configurable": {"thread_id": thread_id},
+        "recursion_limit": 12,
+    }
     if callbacks:
         config["callbacks"] = callbacks
 

@@ -47,17 +47,11 @@ def route_after_review(state):
     return "reject"
 
 
-def build_graph(recursion_limit=12):
+def build_graph():
     """Build and compile the workflow graph with SQLite checkpointing.
     
     Must be called inside an async context (where an event loop is running)
     because AsyncSqliteSaver requires one.
-    
-    Args:
-        recursion_limit: Maximum steps allowed before GraphRecursionError.
-            The longest legitimate path is 7 steps (input_guardrail -> classify ->
-            retrieve -> draft_fix -> guardrail -> review -> execute). We set 12 to
-            allow for potential backtracking while catching true infinite loops.
     """
     workflow = StateGraph(TriageState)
     workflow.add_node("input_guardrail", timed_node(input_guardrail, "input_guardrail"))
@@ -85,5 +79,5 @@ def build_graph(recursion_limit=12):
     # Compile with SQLite checkpointing (async)
     conn = aiosqlite.connect(CHECKPOINT_DB_PATH)
     checkpointer = AsyncSqliteSaver(conn)
-    graph = workflow.compile(checkpointer=checkpointer, recursion_limit=recursion_limit)
+    graph = workflow.compile(checkpointer=checkpointer)
     return graph, conn

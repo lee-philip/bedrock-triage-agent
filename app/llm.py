@@ -5,6 +5,14 @@ from app.config import (
     LMSTUDIO_BASE_URL, LMSTUDIO_MODEL, LMSTUDIO_EMBED_MODEL,
     BEDROCK_MODEL_ID, BEDROCK_EMBED_MODEL_ID, AWS_REGION
 )
+from app.observability import observe
+
+
+@observe(name="chat", as_type="generation")
+async def chat_model_ainvoke(model, messages, config=None, **kwargs):
+    """Tracked wrapper for model invocation with usage reporting."""
+    response = await model.ainvoke(messages, config=config, **kwargs)
+    return response
 
 
 def get_chat_model():

@@ -1,0 +1,12 @@
+bedrock:
+  model-id: amazon.nova-micro-v1:0
+
+aws:
+  profile: bedrock-triage
+
+server:
+  port: 8081
+
+logging:
+  level:
+    com.bedrock: DEBUG

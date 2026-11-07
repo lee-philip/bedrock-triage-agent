@@ -27,4 +27,26 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run tests
+        env:
+          LLM_PROVIDER: bedrock
         run: pytest tests/ -v
+
+  java:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: ["17"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java ${{ matrix.java-version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Run Java tests
+        working-directory: java-client
+        run: mvn -B verify

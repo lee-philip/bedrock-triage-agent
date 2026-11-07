@@ -1,0 +1,7 @@
+com/bedrock/triage/BedrockTriageService.class
+com/bedrock/triage/BedrockTriageClientApplication.class
+com/bedrock/triage/TriageController.class
+com/bedrock/triage/TriageResponse.class
+com/bedrock/triage/BedrockConfig.class
+com/bedrock/triage/TriageRequest.class
+com/bedrock/triage/BedrockClient.class

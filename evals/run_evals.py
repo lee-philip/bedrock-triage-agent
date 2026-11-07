@@ -21,8 +21,10 @@ from typing import Dict, Any, List, Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from langgraph.errors import GraphRecursionError
 from app.graph import build_graph
 from app.config import BEDROCK_MODEL_ID, LMSTUDIO_MODEL
+from app.observability import get_callbacks, add_score, flush
 
 
 class TokenCounter:
@@ -109,25 +111,43 @@ def estimate_tokens(cases: List[Dict[str, Any]]) -> int:
     return total * 3
 
 
-async def run_case(graph, case: Dict[str, Any], verbose: bool) -> Dict[str, Any]:
+async def run_case(graph, callbacks, case: Dict[str, Any], verbose: bool) -> Dict[str, Any]:
     """Run a single case through the graph up to the review interrupt."""
     exception = case["exception"]
     thread_id = f"eval-{case['id']}-{int(time.time())}"
     config = {"configurable": {"thread_id": thread_id}}
+    if callbacks:
+        config["callbacks"] = callbacks
 
     start = time.time()
     node_latencies = {}
 
     try:
         paused = False
-        async for event in graph.astream(
-            {"exception": exception, "run_id": thread_id, "executed": False},
-            config=config
-        ):
-            # Check for interrupts
-            if "interrupts" in event:
-                paused = True
-                break
+        try:
+            async for event in graph.astream(
+                {"exception": exception, "run_id": thread_id, "executed": False},
+                config=config
+            ):
+                # Check for interrupts
+                if "interrupts" in event:
+                    paused = True
+                    break
+        except GraphRecursionError as e:
+            # Tag trace with failure
+            print(f"  ✗ {case['id']} recursion limit exceeded")
+            return {
+                "id": case["id"],
+                "expected_category": case["expected_category"],
+                "predicted_category": "RECURSION_LIMIT",
+                "confidence": 0,
+                "expected_guardrail": case.get("expected_guardrail", "PASS"),
+                "actual_guardrail": "RECURSION_LIMIT",
+                "category_correct": False,
+                "guardrail_correct": False,
+                "latency_ms": round((time.time() - start) * 1000, 1),
+                "node_latencies_ms": {},
+            }
 
         state = await graph.aget_state(config)
         values = state.values
@@ -257,16 +277,41 @@ async def run_evals(provider: str, confirm_cost: bool, verbose: bool):
     # Run cases
     results = []
 
+    # Build graph with Langfuse callbacks
+    eval_run_name = f"eval-{model_id.replace(':', '-')}"
+    callbacks = get_callbacks("eval-run", "eval-run", eval_run_name=eval_run_name)
+    
+    trace_results = []
     for i, case in enumerate(cases, 1):
         print(f"Running case {i}/{len(cases)}: {case['id']}")
 
         # Fresh graph for each case (checkpoint DB persists between them)
         graph, conn = build_graph()
         try:
-            result = await run_case(graph, case, verbose)
-            results.append(result)
+            result = await run_case(graph, callbacks, case, verbose)
+            result["thread_id"] = f"eval-{case['id']}-{int(time.time())}"
+            trace_results.append(result)
         finally:
             await conn.close()
+
+    # Add scores to Langfuse traces for eval runs
+    if callbacks:
+        print("\nAdding eval scores to Langfuse traces...")
+        for result in trace_results:
+            # The Langfuse callback generates a trace ID; we attach scores by thread_id
+            # which the callback uses as session_id
+            add_score(
+                trace_id=result["thread_id"],
+                name="category_correct",
+                value=1.0 if result["category_correct"] else 0.0,
+                data_type="NUMERIC",
+            )
+            add_score(
+                trace_id=result["thread_id"],
+                name="guardrail_agree",
+                value=1.0 if result["guardrail_correct"] else 0.0,
+                data_type="NUMERIC",
+            )
 
     # Print results
     print_results(results, cases)

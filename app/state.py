@@ -22,3 +22,8 @@ class TriageState(TypedDict):
     idempotency_key: Optional[str]
     settlement_result: Optional[str]
     audit: Annotated[List[Dict[str, Any]], operator.add]
+    input_tokens: int
+    output_tokens: int
+    prompt_name: Optional[str]
+    prompt_version: Optional[str]
+    langfuse_trace_id: Optional[str]

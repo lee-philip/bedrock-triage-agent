@@ -13,6 +13,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from app.config import LLM_PROVIDER, GUARDRAIL_ID, GUARDRAIL_VERSION, GUARDRAIL_REGION
+from app.observability import start_span
 
 
 def get_bedrock_runtime_client():
@@ -168,13 +169,19 @@ def apply_stub_guardrail(draft: str) -> dict:
 async def guardrail(state):
     """Apply guardrail to the fix draft."""
     draft = state.get("draft", "")
+    span, lf = start_span("bedrock-guardrail", input={"draft_length": len(draft)})
     
-    if LLM_PROVIDER == "bedrock" and GUARDRAIL_ID:
-        result = apply_bedrock_guardrail(draft, source="OUTPUT")
-        provider = "bedrock"
-    else:
-        result = apply_stub_guardrail(draft)
-        provider = "stub"
+    try:
+        if LLM_PROVIDER == "bedrock" and GUARDRAIL_ID:
+            result = apply_bedrock_guardrail(draft, source="OUTPUT")
+            provider = "bedrock"
+        else:
+            result = apply_stub_guardrail(draft)
+            provider = "stub"
+    finally:
+        if span is not None:
+            span.update(output={"action": result["action"]})
+            span.end()
 
     audit_entry = {
         "node": "guardrail",

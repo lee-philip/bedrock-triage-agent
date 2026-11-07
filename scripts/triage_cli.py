@@ -15,31 +15,44 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from langgraph.types import Command
+from langgraph.errors import GraphRecursionError
 from app.graph import build_graph
+from app.observability import get_callbacks, flush
 
 
 async def submit(sample_path: str):
     """Submit an exception for triage."""
+    with open(sample_path) as f:
+        exception = json.load(f)
+
+    thread_id = f"run-{exception.get('trade_id', 'unknown')}"
+
+    # Build graph with Langfuse callbacks
+    callbacks = get_callbacks(thread_id, thread_id)
     graph, conn = build_graph()
     try:
-        with open(sample_path) as f:
-            exception = json.load(f)
-
-        thread_id = f"run-{exception.get('trade_id', 'unknown')}"
         config = {"configurable": {"thread_id": thread_id}}
+        if callbacks:
+            config["callbacks"] = callbacks
 
         print(f"Submitting exception {exception.get('trade_id', 'N/A')}...")
         print(f"Thread ID: {thread_id}")
 
         # Use astream to handle interrupts properly
         paused = False
-        async for event in graph.astream(
-            {"exception": exception, "run_id": thread_id, "executed": False},
-            config=config
-        ):
-            if "interrupts" in event:
-                paused = True
-                break
+        try:
+            async for event in graph.astream(
+                {"exception": exception, "run_id": thread_id, "executed": False},
+                config=config
+            ):
+                if "interrupts" in event:
+                    paused = True
+                    break
+        except GraphRecursionError as e:
+            print(f"Graph exceeded recursion limit: {e}")
+            from app.audit import write_audit
+            write_audit(thread_id, "step_limit", data={"error": "ABORTED_STEP_LIMIT"})
+            return thread_id
 
         # Check if we stopped at review (interrupt)
         state = await graph.aget_state(config)
@@ -77,9 +90,12 @@ async def submit(sample_path: str):
 
 async def review(thread_id: str):
     """Review a pending exception and resume the graph."""
+    callbacks = get_callbacks(thread_id, thread_id)
     graph, conn = build_graph()
     try:
         config = {"configurable": {"thread_id": thread_id}}
+        if callbacks:
+            config["callbacks"] = callbacks
 
         # Get current state
         state = await graph.aget_state(config)
@@ -112,14 +128,20 @@ async def review(thread_id: str):
         decision_val = "approved" if decision.startswith("approve") else "rejected"
 
         # Resume the graph with the decision
-        final_state = await graph.ainvoke(
-            Command(resume={
-                "decision": decision_val,
-                "reviewer": reviewer,
-                "comment": comment,
-            }),
-            config=config
-        )
+        try:
+            final_state = await graph.ainvoke(
+                Command(resume={
+                    "decision": decision_val,
+                    "reviewer": reviewer,
+                    "comment": comment,
+                }),
+                config=config
+            )
+        except GraphRecursionError as e:
+            print(f"Graph exceeded recursion limit: {e}")
+            from app.audit import write_audit
+            write_audit(thread_id, "step_limit", data={"error": "ABORTED_STEP_LIMIT"})
+            return
 
         print(f"\nFinal decision: {final_state.get('decision', 'unknown')}")
         print(f"Executed: {final_state.get('executed', False)}")
@@ -129,6 +151,7 @@ async def review(thread_id: str):
             print(f"Idempotency key: {final_state.get('idempotency_key')}")
     finally:
         await conn.close()
+        flush()
 
 
 def main():

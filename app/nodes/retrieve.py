@@ -8,6 +8,7 @@ import numpy as np
 
 from app.llm import get_embeddings
 from app.config import EMBED_PROVIDER
+from app.observability import start_span
 
 # Index directory
 INDEX_DIR = Path(__file__).resolve().parents[2] / "data" / f"index-{EMBED_PROVIDER}"
@@ -44,26 +45,34 @@ async def retrieve(state):
     if exception.get("notes"):
         query += f" {exception['notes']}"
 
-    # Embed query
-    embeddings_model = get_embeddings()
-    query_vector = embeddings_model.embed_query(query)
-    query_np = np.array([query_vector], dtype=np.float32)
-    faiss.normalize_L2(query_np)
+    span, lf = start_span("faiss-retrieve", input={"query": query, "category": category})
 
-    # Search for top k=3 chunks
-    k = 3
-    distances, indices = _index.search(query_np, k)
+    try:
+        # Embed query
+        embeddings_model = get_embeddings()
+        query_vector = embeddings_model.embed_query(query)
+        query_np = np.array([query_vector], dtype=np.float32)
+        faiss.normalize_L2(query_np)
 
-    # Collect results
-    chunks = []
-    for dist, idx in zip(distances[0], indices[0]):
-        if idx == -1 or idx >= len(_metadata):
-            continue
-        chunk = _metadata[idx].copy()
-        chunk["score"] = float(dist)
-        chunks.append(chunk)
+        # Search for top k=3 chunks
+        k = 3
+        distances, indices = _index.search(query_np, k)
 
-    chunk_ids = [c["id"] for c in chunks]
+        # Collect results
+        chunks = []
+        for dist, idx in zip(distances[0], indices[0]):
+            if idx == -1 or idx >= len(_metadata):
+                continue
+            chunk = _metadata[idx].copy()
+            chunk["score"] = float(dist)
+            chunks.append(chunk)
+
+        chunk_ids = [c["id"] for c in chunks]
+        span.update(output={"chunk_ids": chunk_ids, "count": len(chunks)})
+    finally:
+        if span is not None:
+            span.end()
+
     print(f"\n=== RETRIEVE ===")
     print(f"Retrieved {len(chunks)} runbook chunks: {', '.join(chunk_ids)}")
     return {

@@ -5,8 +5,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.graph import graph
+from app.graph import build_graph, GraphRecursionError
 from app.state import TriageState
+from app.observability import get_callbacks, flush
 
 SAMPLES = {
     "exception_001": "samples/exception_001.json",
@@ -27,23 +28,42 @@ async def run_sample(sample_id):
     with open(sample_path) as f:
         exception_data = json.load(f)
 
-    initial_state = TriageState(
-        exception=exception_data,
-        run_id=f"run-{sample_id}",
-        category=None,
-        confidence=None,
-        reason=None,
-        runbook_chunks=[],
-        draft=None,
-        guardrail_action=None,
-        decision=None,
-        reviewer=None,
-        reviewer_comment=None,
-        executed=False,
-        audit=[],
-    )
+    thread_id = f"run-{sample_id}"
 
-    final_state = await graph.ainvoke(initial_state)
+    # Build graph with Langfuse callbacks
+    callbacks = get_callbacks(thread_id, thread_id)
+    graph, conn = build_graph()
+    try:
+        initial_state = TriageState(
+            exception=exception_data,
+            run_id=thread_id,
+            category=None,
+            confidence=None,
+            reason=None,
+            runbook_chunks=[],
+            draft=None,
+            guardrail_action=None,
+            decision=None,
+            reviewer=None,
+            reviewer_comment=None,
+            executed=False,
+            audit=[],
+        )
+
+        config = {"callbacks": callbacks} if callbacks else None
+
+        try:
+            final_state = await graph.ainvoke(initial_state, config=config)
+        except GraphRecursionError as e:
+            print(f"Graph exceeded recursion limit: {e}")
+            # Write audit entry for step limit exceeded
+            from app.audit import write_audit
+            write_audit(thread_id, "step_limit", data={"error": "ABORTED_STEP_LIMIT"})
+            final_state = {"exception": exception_data, "decision": "rejected", "reason": "step limit exceeded"}
+
+    finally:
+        await conn.close()
+        flush()
 
     print(f"\n=== Results for {sample_id} (Trade {exception_data.get('trade_id')}) ===")
     print(f"Category: {final_state.get('category')}")

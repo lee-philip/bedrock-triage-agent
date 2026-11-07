@@ -51,9 +51,11 @@ async def run_sample(sample_id):
         )
 
         config = {
-            "callbacks": callbacks,
+            "configurable": {"thread_id": thread_id},
             "recursion_limit": 12,
-        } if callbacks else {"recursion_limit": 12}
+        }
+        if callbacks:
+            config["callbacks"] = callbacks
 
         try:
             final_state = await graph.ainvoke(initial_state, config=config)

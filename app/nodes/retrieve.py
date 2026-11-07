@@ -68,7 +68,8 @@ async def retrieve(state):
             chunks.append(chunk)
 
         chunk_ids = [c["id"] for c in chunks]
-        span.update(output={"chunk_ids": chunk_ids, "count": len(chunks)})
+        if span is not None:
+            span.update(output={"chunk_ids": chunk_ids, "count": len(chunks)})
     finally:
         if span is not None:
             span.end()

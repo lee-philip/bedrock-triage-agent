@@ -1,71 +1,38 @@
-"""Execute node with idempotency.
+"""Execute node. Applies an approved proposal through the MCP apply_fix tool.
 
-Simulates a settlement system using a SQLite table with a UNIQUE constraint
-on the idempotency key. If the key exists, the execution is skipped (idempotent).
+The settlement write and the idempotency key live in the MCP server. This
+node only runs after review routes an approval here. A rejected case goes to
+the reject node and never calls apply_fix.
 """
-import sqlite3
-import hashlib
-import json
-from pathlib import Path
+from app.tools import call_tool
+from mcp_server.db import DEFAULT_DB
+from mcp_server.settlement import compute_idempotency_key
 
-from app.audit import get_model_id
-
-SETTLEMENT_DB_PATH = Path(__file__).resolve().parents[2] / "data" / "settlements.db"
-
-
-def _get_settlement_db():
-    """Get a connection to the simulated settlement system database."""
-    db_dir = SETTLEMENT_DB_PATH.parent
-    db_dir.mkdir(exist_ok=True)
-    conn = sqlite3.connect(str(SETTLEMENT_DB_PATH))
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS settlements (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            idempotency_key TEXT UNIQUE NOT NULL,
-            trade_id TEXT NOT NULL,
-            category TEXT NOT NULL,
-            status TEXT NOT NULL,
-            timestamp TEXT NOT NULL
-        )
-    """)
-    conn.commit()
-    return conn
-
-
-def compute_idempotency_key(trade_id: str, category: str, proposed_fix_steps: list) -> str:
-    """Compute SHA-256 idempotency key from trade details."""
-    raw = f"{trade_id}|{category}|{json.dumps(proposed_fix_steps, sort_keys=True)}"
-    return hashlib.sha256(raw.encode()).hexdigest()
+# Older callers imported this path from the execute node. The server reads
+# SETTLEMENT_DB, or this file when that variable is unset.
+SETTLEMENT_DB_PATH = DEFAULT_DB
 
 
 async def execute(state):
-    """Apply the approved fix (simulated settlement system with idempotency)."""
-    trade_id = state["exception"].get("trade_id", "N/A")
-    category = state.get("category", "UNKNOWN")
-    proposed_fix_steps = state.get("proposed_fix_steps", [])
+    """Apply the approved fix to the simulated settlement table."""
+    proposal_id = state.get("proposal_id")
+    approval_id = state.get("approval_id")
+    if proposal_id is None or not approval_id:
+        return {
+            "executed": False,
+            "idempotency_key": None,
+            "settlement_result": "REFUSED",
+        }
 
-    idempotency_key = compute_idempotency_key(trade_id, category, proposed_fix_steps)
-
-    conn = _get_settlement_db()
-    try:
-        from datetime import datetime, timezone
-        timestamp = datetime.now(timezone.utc).isoformat()
-
-        try:
-            conn.execute(
-                "INSERT INTO settlements (idempotency_key, trade_id, category, status, timestamp) VALUES (?, ?, ?, ?, ?)",
-                (idempotency_key, trade_id, category, "APPLIED", timestamp)
-            )
-            conn.commit()
-            result = "APPLIED"
-        except sqlite3.IntegrityError:
-            # Duplicate key — settlement already applied
-            result = "DUPLICATE_SKIPPED"
-    finally:
-        conn.close()
-
+    # apply_fix is a WRITE tool. The node calls it here. It is not offered to
+    # the model with bind_tools, so the model cannot apply a fix on its own.
+    result = await call_tool(
+        "apply_fix",
+        {"proposal_id": int(proposal_id), "approval_id": approval_id},
+    )
+    status = result.get("status", "ERROR")
     return {
-        "executed": True,
-        "idempotency_key": idempotency_key,
-        "settlement_result": result,
+        "executed": status in ("APPLIED", "DUPLICATE_SKIPPED"),
+        "idempotency_key": result.get("idempotency_key"),
+        "settlement_result": status,
     }

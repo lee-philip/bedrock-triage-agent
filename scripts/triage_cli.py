@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from langgraph.types import Command
 from langgraph.errors import GraphRecursionError
 from app.graph import build_graph
-from app.observability import get_callbacks, flush, check_token_budget
+from app.observability import get_trace_config, flush, check_token_budget
 
 
 async def submit(sample_path: str):
@@ -27,16 +27,13 @@ async def submit(sample_path: str):
 
     thread_id = f"run-{exception.get('trade_id', 'unknown')}"
 
-    # Build graph with Langfuse callbacks
-    callbacks = get_callbacks(thread_id, thread_id)
     graph, conn = build_graph()
     try:
         config = {
             "configurable": {"thread_id": thread_id},
             "recursion_limit": 12,
+            **get_trace_config(thread_id, thread_id),
         }
-        if callbacks:
-            config["callbacks"] = callbacks
 
         print(f"Submitting exception {exception.get('trade_id', 'N/A')}...")
         print(f"Thread ID: {thread_id}")
@@ -89,19 +86,18 @@ async def submit(sample_path: str):
         return thread_id
     finally:
         await conn.close()
+        flush()
 
 
 async def review(thread_id: str):
     """Review a pending exception and resume the graph."""
-    callbacks = get_callbacks(thread_id, thread_id)
     graph, conn = build_graph()
     try:
         config = {
             "configurable": {"thread_id": thread_id},
             "recursion_limit": 12,
+            **get_trace_config(thread_id, thread_id),
         }
-        if callbacks:
-            config["callbacks"] = callbacks
 
         # Get current state
         state = await graph.aget_state(config)

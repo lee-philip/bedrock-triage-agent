@@ -7,6 +7,10 @@ is disabled or unreachable.
 import os
 import logging
 
+# Load .env file for configuration
+from dotenv import load_dotenv
+load_dotenv()
+
 from app.config import LLM_PROVIDER, LMSTUDIO_MODEL, BEDROCK_MODEL_ID
 
 logger = logging.getLogger(__name__)
@@ -17,7 +21,6 @@ LANGFUSE_PUBLIC_KEY = os.environ.get("LANGFUSE_PUBLIC_KEY")
 LANGFUSE_SECRET_KEY = os.environ.get("LANGFUSE_SECRET_KEY")
 
 _client = None
-_handler = None
 
 
 def get_model_name():
@@ -49,21 +52,20 @@ def get_client():
     return _client
 
 
-def get_callbacks(run_id, thread_id, eval_run_name=None):
-    """Get Langfuse callback handler with proper session and metadata.
+def _trace_metadata(run_id, thread_id, eval_run_name=None):
+    """Metadata Langfuse reads from the LangChain run config.
 
-    Returns empty list if Langfuse is disabled or unavailable.
+    Session, tags, and trace name must use the langfuse_* keys. The SDK 5
+    callback handler no longer accepts them as constructor arguments.
     """
-    global _handler
-    client = get_client()
-    if client is None:
-        return []
-
     tags = [LLM_PROVIDER, get_model_name()]
     if eval_run_name:
         tags.append(f"eval:{eval_run_name}")
 
     metadata = {
+        "langfuse_session_id": run_id,
+        "langfuse_tags": tags,
+        "langfuse_trace_name": run_id,
         "run_id": run_id,
         "thread_id": thread_id,
         "provider": LLM_PROVIDER,
@@ -71,18 +73,38 @@ def get_callbacks(run_id, thread_id, eval_run_name=None):
     }
     if eval_run_name:
         metadata["eval_run"] = eval_run_name
+    return metadata
+
+
+def get_trace_config(run_id, thread_id, eval_run_name=None):
+    """LangGraph config fragment that records this run in Langfuse.
+
+    Merge the result into the invoke config. Model calls inside the graph
+    then show up as generations. Returns {} when Langfuse is disabled.
+    """
+    client = get_client()
+    if client is None:
+        return {}
 
     try:
         from langfuse.langchain import CallbackHandler
-        _handler = CallbackHandler(
-            session_id=run_id,
-            tags=tags,
-            metadata=metadata,
-        )
-        return [_handler]
+        return {
+            "callbacks": [CallbackHandler()],
+            "metadata": _trace_metadata(run_id, thread_id, eval_run_name),
+        }
     except Exception as e:
         logger.warning(f"Langfuse callback handler creation failed: {e}")
-        return []
+        return {}
+
+
+def get_callbacks(run_id, thread_id, eval_run_name=None):
+    """Get Langfuse callback handlers for this run.
+
+    Returns an empty list if Langfuse is disabled or unavailable.
+    Prefer get_trace_config() when building a graph invoke config so the
+    session and tags are included.
+    """
+    return get_trace_config(run_id, thread_id, eval_run_name).get("callbacks", [])
 
 
 def flush():

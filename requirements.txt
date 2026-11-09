@@ -11,3 +11,5 @@ fastapi
 uvicorn
 aiosqlite
 langfuse
+mcp[cli]
+langchain[mcp]

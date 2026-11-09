@@ -18,6 +18,9 @@ class TriageState(TypedDict):
     decision: Optional[str]
     reviewer: Optional[str]
     reviewer_comment: Optional[str]
+    proposal_id: Optional[int]
+    approval_id: Optional[str]
+    trade_record: Optional[Dict[str, Any]]
     executed: bool
     idempotency_key: Optional[str]
     settlement_result: Optional[str]

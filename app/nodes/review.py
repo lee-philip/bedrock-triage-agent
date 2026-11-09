@@ -8,6 +8,8 @@ the top when resumed.
 """
 from langgraph.types import interrupt
 
+from mcp_server.settlement import record_approval
+
 
 async def review(state):
     """Human-in-the-loop review. Interrupts and waits for a decision."""
@@ -28,8 +30,18 @@ async def review(state):
     decision_dict = interrupt(payload)
 
     # decision_dict is the resumed value: {decision, reviewer, comment}
-    return {
-        "decision": decision_dict.get("decision", "rejected"),
-        "reviewer": decision_dict.get("reviewer", "unknown"),
+    # Recording the approval happens after interrupt(), so a resume does not
+    # stage a second approval while the node replays from the top.
+    decision = decision_dict.get("decision", "rejected")
+    reviewer = decision_dict.get("reviewer", "unknown")
+    result = {
+        "decision": decision,
+        "reviewer": reviewer,
         "reviewer_comment": decision_dict.get("comment", ""),
     }
+    if decision == "approved":
+        proposal_id = state.get("proposal_id")
+        if proposal_id is None:
+            raise RuntimeError("Cannot approve a fix that was never staged")
+        result["approval_id"] = record_approval(int(proposal_id), reviewer)
+    return result

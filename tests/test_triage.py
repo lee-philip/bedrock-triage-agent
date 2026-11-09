@@ -86,39 +86,35 @@ def test_idempotency_key_is_sha256_hex():
     assert all(c in "0123456789abcdef" for c in key)
 
 
-def test_execute_idempotency_duplicate_skipped(tmp_path):
-    """Second execution with same key should be skipped (idempotent)."""
-    # Temporarily point to a fresh DB for this test
-    import app.nodes.execute as exec_mod
-    from app.nodes.execute import execute
-    original_path = exec_mod.SETTLEMENT_DB_PATH
-    test_db = tmp_path / "settlements.db"
-    exec_mod.SETTLEMENT_DB_PATH = test_db
+def test_execute_idempotency_duplicate_skipped(tmp_path, monkeypatch):
+    """Second apply of the same approved proposal is skipped (idempotent)."""
+    monkeypatch.setenv("SETTLEMENT_DB", str(tmp_path / "settlement.db"))
+    monkeypatch.setenv("MCP_CLIENT", "triage-graph")
+    from mcp_server.server import apply_fix, propose_fix
+    from mcp_server.settlement import record_approval
 
-    state = {
-        "exception": {"trade_id": "T-100"},
-        "category": "SSI_MISMATCH",
-        "proposed_fix_steps": ["contact counterparty"],
-    }
+    first = propose_fix(
+        trade_id="T-1042",
+        category="SSI_MISMATCH",
+        steps=["contact counterparty"],
+        citations=["RB-ssi"],
+    )
+    approval = record_approval(first["proposal_id"], "reviewer")
+    applied = apply_fix(proposal_id=first["proposal_id"], approval_id=approval)
+    assert applied["status"] == "APPLIED"
 
-    result1 = asyncio.run(execute(state))
-    assert result1["settlement_result"] == "APPLIED"
+    again = apply_fix(proposal_id=first["proposal_id"], approval_id=approval)
+    assert again["status"] == "DUPLICATE_SKIPPED"
 
-    # Second run should be skipped
-    result2 = asyncio.run(execute(state))
-    assert result2["settlement_result"] == "DUPLICATE_SKIPPED"
-
-    # Different fix steps = different key = should apply
-    state3 = {
-        "exception": {"trade_id": "T-100"},
-        "category": "SSI_MISMATCH",
-        "proposed_fix_steps": ["different fix"],
-    }
-    result3 = asyncio.run(execute(state3))
-    assert result3["settlement_result"] == "APPLIED"
-
-    # Restore original path
-    exec_mod.SETTLEMENT_DB_PATH = original_path
+    other = propose_fix(
+        trade_id="T-1042",
+        category="SSI_MISMATCH",
+        steps=["different fix"],
+        citations=["RB-ssi"],
+    )
+    other_approval = record_approval(other["proposal_id"], "reviewer")
+    other_applied = apply_fix(proposal_id=other["proposal_id"], approval_id=other_approval)
+    assert other_applied["status"] == "APPLIED"
 
 
 # --- Test 3: Classify schema ---

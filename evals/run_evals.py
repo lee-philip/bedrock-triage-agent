@@ -24,7 +24,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from langgraph.errors import GraphRecursionError
 from app.graph import build_graph
 from app.config import BEDROCK_MODEL_ID, LMSTUDIO_MODEL
-from app.observability import get_callbacks, add_score, flush, check_token_budget
+from app.observability import get_trace_config, add_score, flush, check_token_budget
 
 
 class TokenCounter:
@@ -111,16 +111,15 @@ def estimate_tokens(cases: List[Dict[str, Any]]) -> int:
     return total * 3
 
 
-async def run_case(graph, callbacks, case: Dict[str, Any], verbose: bool) -> Dict[str, Any]:
+async def run_case(graph, case: Dict[str, Any], verbose: bool, eval_run_name=None) -> Dict[str, Any]:
     """Run a single case through the graph up to the review interrupt."""
     exception = case["exception"]
     thread_id = f"eval-{case['id']}-{int(time.time())}"
     config = {
         "configurable": {"thread_id": thread_id},
         "recursion_limit": 12,
+        **get_trace_config(thread_id, thread_id, eval_run_name=eval_run_name),
     }
-    if callbacks:
-        config["callbacks"] = callbacks
 
     start = time.time()
     node_latencies = {}
@@ -280,10 +279,9 @@ async def run_evals(provider: str, confirm_cost: bool, verbose: bool):
     # Run cases
     results = []
 
-    # Build graph with Langfuse callbacks
     eval_run_name = f"eval-{model_id.replace(':', '-')}"
-    callbacks = get_callbacks("eval-run", "eval-run", eval_run_name=eval_run_name)
-    
+    tracing_enabled = bool(get_trace_config("eval-run", "eval-run", eval_run_name=eval_run_name))
+
     trace_results = []
     for i, case in enumerate(cases, 1):
         print(f"Running case {i}/{len(cases)}: {case['id']}")
@@ -291,14 +289,14 @@ async def run_evals(provider: str, confirm_cost: bool, verbose: bool):
         # Fresh graph for each case (checkpoint DB persists between them)
         graph, conn = build_graph()
         try:
-            result = await run_case(graph, callbacks, case, verbose)
+            result = await run_case(graph, case, verbose, eval_run_name=eval_run_name)
             result["thread_id"] = f"eval-{case['id']}-{int(time.time())}"
             trace_results.append(result)
         finally:
             await conn.close()
 
     # Add scores to Langfuse traces for eval runs
-    if callbacks:
+    if tracing_enabled:
         print("\nAdding eval scores to Langfuse traces...")
         for result in trace_results:
             # The Langfuse callback generates a trace ID; we attach scores by thread_id

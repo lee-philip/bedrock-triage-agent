@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from app.llm import get_chat_model
 from app.observability import get_prompt
+from app.tools import call_tool
 
 
 class FixDraft(BaseModel):
@@ -65,12 +66,29 @@ async def draft_fix(state):
 
     print(f"\n=== DRAFT FIX ===")
     print(f"Citations: {', '.join(result.citations)}")
+
+    # Stage the fix through MCP. propose_fix is a WRITE tool called here, at
+    # this fixed point, and is not bound to the model. It only inserts a
+    # PENDING_APPROVAL row. apply_fix runs later, from execute, after review.
+    proposal = await call_tool(
+        "propose_fix",
+        {
+            "trade_id": exception.get("trade_id", ""),
+            "category": category,
+            "steps": result.proposed_fix_steps,
+            "citations": result.citations,
+        },
+    )
+    if not proposal.get("ok"):
+        raise RuntimeError(proposal.get("error", "propose_fix failed"))
+
     return {
         "draft": draft,
         "root_cause": result.root_cause,
         "proposed_fix_steps": result.proposed_fix_steps,
         "citations": result.citations,
         "risk_notes": result.risk_notes,
+        "proposal_id": proposal.get("proposal_id"),
         "input_tokens": input_tokens,
         "output_tokens": output_tokens,
         "prompt_name": prompt_data.get("prompt_name"),

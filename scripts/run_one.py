@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.graph import build_graph, GraphRecursionError
 from app.state import TriageState
-from app.observability import get_callbacks, flush, check_token_budget
+from app.observability import get_trace_config, flush, check_token_budget
 
 SAMPLES = {
     "exception_001": "samples/exception_001.json",
@@ -30,8 +30,6 @@ async def run_sample(sample_id):
 
     thread_id = f"run-{sample_id}"
 
-    # Build graph with Langfuse callbacks
-    callbacks = get_callbacks(thread_id, thread_id)
     graph, conn = build_graph()
     try:
         initial_state = TriageState(
@@ -53,9 +51,8 @@ async def run_sample(sample_id):
         config = {
             "configurable": {"thread_id": thread_id},
             "recursion_limit": 12,
+            **get_trace_config(thread_id, thread_id),
         }
-        if callbacks:
-            config["callbacks"] = callbacks
 
         try:
             final_state = await graph.ainvoke(initial_state, config=config)

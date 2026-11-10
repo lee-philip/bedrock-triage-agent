@@ -23,7 +23,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from langgraph.errors import GraphRecursionError
 from app.graph import build_graph
-from app.config import BEDROCK_MODEL_ID, LMSTUDIO_MODEL
 from app.observability import get_trace_config, add_score, flush, check_token_budget
 
 
@@ -279,7 +278,7 @@ async def run_evals(provider: str, confirm_cost: bool, verbose: bool):
     # Run cases
     results = []
 
-    eval_run_name = f"eval-{model_id.replace(':', '-')}"
+    eval_run_name = f"eval-{provider}"
     tracing_enabled = bool(get_trace_config("eval-run", "eval-run", eval_run_name=eval_run_name))
 
     trace_results = []
@@ -326,15 +325,14 @@ async def run_evals(provider: str, confirm_cost: bool, verbose: bool):
         avg_latency = sum(_counter.latencies) / len(_counter.latencies) * 1000
         print(f"LLM call latency: avg={avg_latency:.0f}ms")
 
-    # Save results
-    model_id = BEDROCK_MODEL_ID if provider == "bedrock" else LMSTUDIO_MODEL
+    # Save results. The filename and body keep the provider only.
+    # The model id stays out of the repo.
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    output_file = results_dir / f"{timestamp}-{provider}-{model_id.replace(':', '-')}.json"
+    output_file = results_dir / f"{timestamp}-{provider}.json"
     with open(output_file, "w") as f:
         json.dump({
             "timestamp": timestamp,
             "provider": provider,
-            "model": model_id,
             "cases": len(cases),
             "results": results,
             "total_input_tokens": total_input,

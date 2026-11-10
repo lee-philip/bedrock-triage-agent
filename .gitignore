@@ -2,3 +2,8 @@
 .env
 __pycache__/
 *.pyc
+
+# Local model ids belong in .env. A result file named
+# {timestamp}-local-<model>.json still has that id in the filename.
+# Tracked results are {timestamp}-local.json, with no model segment.
+evals/results/*-local-*.json
